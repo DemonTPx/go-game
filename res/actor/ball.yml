@@ -1,0 +1,16 @@
+- type: render
+  data:
+    type: ball
+    color:
+      r: 0xaa
+      g: 0xbb
+      b: 0xcc
+      a: 0xff
+- type: physics
+  data:
+    strength: 100
+    shape: circle
+#- type: control
+#  data:
+#    control:
+#      type: kaas
