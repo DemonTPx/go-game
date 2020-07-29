@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
+	"math"
 )
 
 type Main struct {
@@ -13,8 +14,8 @@ type Main struct {
 	aRight  bool
 	aUp     bool
 	aDown   bool
-	vX      int32
-	vY      int32
+	vX      float64
+	vY      float64
 }
 
 const (
@@ -57,8 +58,8 @@ func (m *Main) Run() error {
 }
 
 func (m *Main) mainLoop() error {
-	x := int32(0)
-	y := int32(0)
+	x := float64(0)
+	y := float64(0)
 
 	m.Timer.Start()
 	for m.Running {
@@ -73,39 +74,35 @@ func (m *Main) mainLoop() error {
 		surface.FillRect(nil, 0)
 
 		if m.aLeft {
-			m.vX = m.vX - 1
+			m.vX = m.vX - 0.1
 		}
 		if m.aRight {
-			m.vX = m.vX + 1
+			m.vX = m.vX + 0.1
 		}
 		if m.aUp {
-			m.vY = m.vY - 1
+			m.vY = m.vY - 0.1
 		}
 		if m.aDown {
-			m.vY = m.vY + 1
+			m.vY = m.vY + 0.1
 		}
 
 		x += m.vX
 		y += m.vY
 
-		if x > (windowW - 20) {
-			m.vX = 0
-			x = windowW - 20
+		if x >= (windowW-math.Abs(m.vX)) && m.vX > 0 {
+			m.vX = -m.vX
 		}
-		if x < 0 {
-			m.vX = 0
-			x = 0
+		if x < 0 && m.vX < 0 {
+			m.vX = -m.vX
 		}
-		if y > (windowH - 20) {
-			m.vY = 0
-			y = windowH - 20
+		if y > (windowH-math.Abs(m.vY)) && m.vY > 0 {
+			m.vY = -m.vY
 		}
-		if y < 0 {
-			m.vY = 0
-			y = 0
+		if y < 0 && m.vY < 0 {
+			m.vY = -m.vY
 		}
 
-		rect := sdl.Rect{x, y, 20, 20}
+		rect := sdl.Rect{int32(x), int32(y), int32(math.Abs(m.vX)) + 5, int32(math.Abs(m.vY)) + 5}
 		surface.FillRect(&rect, 0xffff0000)
 
 		m.flip()
