@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/demontpx/go-game/lib/actor"
 	"github.com/demontpx/go-game/lib/game"
 )

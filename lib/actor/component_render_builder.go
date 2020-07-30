@@ -2,12 +2,11 @@ package actor
 
 import (
 	"fmt"
-	"github.com/mitchellh/mapstructure"
-)
 
-type ComponentBuilder interface {
-	Build(data VariableConfig) (Component, error)
-}
+	"github.com/mitchellh/mapstructure"
+
+	"github.com/demontpx/go-game/lib/actor/property"
+)
 
 type RenderComponentBuilder struct {
 }
@@ -23,7 +22,7 @@ func (b *RenderComponentBuilder) Build(data VariableConfig) (Component, error) {
 		if err != nil {
 			return nil, fmt.Errorf("invalid configuration for type '%s': %s", data["type"], err)
 		}
-		color := Color{}
+		color := property.Color{}
 		err = mapstructure.Decode(colorConfig, &color)
 		if err != nil {
 			return nil, fmt.Errorf("invalid configuration for type '%s': %s", data["type"], err)
@@ -33,15 +32,4 @@ func (b *RenderComponentBuilder) Build(data VariableConfig) (Component, error) {
 	default:
 		return NewRenderComponent(), nil
 	}
-}
-
-type PhysicsComponentBuilder struct {
-}
-
-func NewPhysicsComponentBuilder() *PhysicsComponentBuilder {
-	return &PhysicsComponentBuilder{}
-}
-
-func (b *PhysicsComponentBuilder) Build(data VariableConfig) (Component, error) {
-	return NewPhysicsComponent(), nil
 }

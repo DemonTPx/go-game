@@ -1,4 +1,4 @@
-package actor
+package property
 
 import "fmt"
 

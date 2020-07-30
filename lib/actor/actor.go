@@ -9,17 +9,27 @@ type Id uint64
 
 type Actor struct {
 	id         Id
-	components []Component
+	components map[ComponentId]Component
 }
 
 func NewActor(id Id) *Actor {
 	return &Actor{
-		id: id,
+		id:         id,
+		components: make(map[ComponentId]Component),
 	}
 }
 
 func (a *Actor) AddComponent(c Component) {
-	a.components = append(a.components, c)
+	a.components[c.Id()] = c
+}
+
+func (a *Actor) GetComponent(id ComponentId) Component {
+	c, ok := a.components[id]
+	if !ok {
+		return nil
+	}
+
+	return c
 }
 
 func (a *Actor) String() string {

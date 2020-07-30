@@ -2,22 +2,24 @@ package actor
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+
+	"gopkg.in/yaml.v2"
 )
 
 type Loader struct {
 	lastId   Id
-	builders map[string]ComponentBuilder
+	builders map[string]Builder
 }
 
 func NewLoader() *Loader {
 	return &Loader{
 		lastId: Id(0),
-		builders: map[string]ComponentBuilder{
-			"render":  NewRenderComponentBuilder(),
-			"physics": NewPhysicsComponentBuilder(),
+		builders: map[string]Builder{
+			"transform": NewTransformComponentBuilder(),
+			"physics":   NewPhysicsComponentBuilder(),
+			"render":    NewRenderComponentBuilder(),
 		},
 	}
 }
