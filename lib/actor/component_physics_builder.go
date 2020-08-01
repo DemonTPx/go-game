@@ -1,5 +1,10 @@
 package actor
 
+import (
+	"fmt"
+	"github.com/DemonTPx/go-game/lib/actor/property"
+)
+
 type PhysicsComponentBuilder struct {
 }
 
@@ -8,5 +13,14 @@ func NewPhysicsComponentBuilder() *PhysicsComponentBuilder {
 }
 
 func (b *PhysicsComponentBuilder) Build(data VariableConfig) (Component, error) {
-	return NewPhysicsComponent(), nil
+	var err error
+
+	velocity := property.NewVector3(0, 0, 0)
+
+	err = extractVector3(data, "velocity", &velocity)
+	if err != nil {
+		return nil, fmt.Errorf("invalid configuration for type '%s': %s", data["type"], err)
+	}
+
+	return NewPhysicsComponent(velocity), nil
 }

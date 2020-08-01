@@ -32,6 +32,10 @@ func (a *Actor) GetComponent(id ComponentId) Component {
 	return c
 }
 
+func (a *Actor) Id() Id {
+	return a.id
+}
+
 func (a *Actor) String() string {
 	return "<Actor " + a.ListComponents() + ">"
 }

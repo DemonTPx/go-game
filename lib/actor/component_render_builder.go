@@ -5,7 +5,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/demontpx/go-game/lib/actor/property"
+	"github.com/DemonTPx/go-game/lib/actor/property"
 )
 
 type RenderComponentBuilder struct {
@@ -28,7 +28,9 @@ func (b *RenderComponentBuilder) Build(data VariableConfig) (Component, error) {
 			return nil, fmt.Errorf("invalid configuration for type '%s': %s", data["type"], err)
 		}
 
-		return NewBallRenderComponent(color), nil
+		segments := data.GetIntOr("segments", 20)
+
+		return NewBallRenderComponent(color, segments), nil
 	default:
 		return NewRenderComponent(), nil
 	}

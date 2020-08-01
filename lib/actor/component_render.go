@@ -1,11 +1,18 @@
 package actor
 
 import (
-	"github.com/demontpx/go-game/lib/actor/property"
+	"fmt"
+	"github.com/DemonTPx/go-game/lib/actor/property"
+	gl "github.com/chsc/gogl/gl21"
+	"math"
 )
 
 type RenderComponent struct {
 	BaseComponent
+}
+
+type Renderer interface {
+	Render()
 }
 
 func NewRenderComponent() *RenderComponent {
@@ -24,13 +31,17 @@ func (c *RenderComponent) String() string {
 	return "<" + c.Name() + ">"
 }
 
-type BallRenderComponent struct {
-	RenderComponent
-	color property.Color
+func (c *RenderComponent) Render() {
 }
 
-func NewBallRenderComponent(color property.Color) *BallRenderComponent {
-	return &BallRenderComponent{color: color}
+type BallRenderComponent struct {
+	RenderComponent
+	color    property.Color
+	segments int
+}
+
+func NewBallRenderComponent(color property.Color, segments int) *BallRenderComponent {
+	return &BallRenderComponent{color: color, segments: segments}
 }
 
 func (c *BallRenderComponent) Name() string {
@@ -38,5 +49,26 @@ func (c *BallRenderComponent) Name() string {
 }
 
 func (c *BallRenderComponent) String() string {
-	return "<" + c.Name() + " color=" + c.color.String() + ">"
+	return fmt.Sprintf("<%s color=%s segments=%d>", c.Name(), c.color.String(), c.segments)
+}
+
+func (c *BallRenderComponent) Render() {
+	transformComponent := c.owner.GetComponent(Transform)
+	if transformComponent == nil {
+		return
+	}
+
+	transform := transformComponent.(*TransformComponent)
+	pos := transform.Position
+	scale := transform.Scale
+
+	gl.Begin(gl.TRIANGLE_FAN)
+	gl.Color4f(gl.Float(c.color.R), gl.Float(c.color.G), gl.Float(c.color.B), gl.Float(c.color.A))
+	gl.Vertex2f(gl.Float(pos.X), gl.Float(pos.Y))
+	segments := float64(c.segments)
+	for n := float64(0); n <= segments; n++ {
+		t := math.Pi * 2 * n / segments
+		gl.Vertex2f(gl.Float(pos.X+math.Sin(t)*scale.X), gl.Float(pos.Y+math.Cos(t)*scale.Y))
+	}
+	gl.End()
 }

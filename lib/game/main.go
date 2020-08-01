@@ -2,25 +2,21 @@ package game
 
 import (
 	"fmt"
+	"github.com/DemonTPx/go-game/lib/actor"
 	gl "github.com/chsc/gogl/gl21"
 	"github.com/veandco/go-sdl2/sdl"
-	"math"
+	"time"
 )
 
 type Main struct {
-	Window   *sdl.Window
-	Renderer *sdl.Renderer
-	Context  sdl.GLContext
-	Running  bool
-	Frame    uint64
-	Timer    *Timer
-	aLeft    bool
-	aRight   bool
-	aUp      bool
-	aDown    bool
-	aSpace   bool
-	vX       float64
-	vY       float64
+	Window      *sdl.Window
+	Renderer    *sdl.Renderer
+	Context     sdl.GLContext
+	Running     bool
+	Frame       uint64
+	Timer       *Timer
+	ActorLoader *actor.Loader
+	Actors      map[actor.Id]*actor.Actor
 }
 
 const (
@@ -32,8 +28,10 @@ const (
 
 func NewMain() *Main {
 	return &Main{
-		Running: true,
-		Timer:   NewTimer(),
+		Running:     true,
+		Timer:       NewTimer(),
+		ActorLoader: actor.NewLoader(),
+		Actors:      make(map[actor.Id]*actor.Actor, 0),
 	}
 }
 
@@ -89,68 +87,60 @@ func (m *Main) Run() error {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
+	actorFilenameList := []string{
+		"res/actor/controllable_ball.yml",
+		"res/actor/ball.yml",
+	}
+
+	for _, filename := range actorFilenameList {
+		err = m.loadActor(filename)
+		if err != nil {
+			return err
+		}
+	}
+
 	return m.mainLoop()
 }
 
-func (m *Main) mainLoop() error {
-	x := float64(windowW / 2)
-	y := float64(windowH / 2)
+func (m *Main) loadActor(filename string) error {
+	a, err := m.ActorLoader.LoadActorFromFile(filename)
+	if err != nil {
+		return err
+	}
 
+	m.Actors[a.Id()] = a
+
+	return nil
+}
+
+func (m *Main) mainLoop() error {
 	m.Timer.Start()
+	delta := 1 * time.Second / 60
 	for m.Running {
 		m.handleEvents()
 
+		for _, a := range m.Actors {
+			control := a.GetComponent(actor.Control)
+			if control != nil {
+				control.Update(delta)
+			}
+		}
+		for _, a := range m.Actors {
+			physics := a.GetComponent(actor.Physics)
+			if physics != nil {
+				physics.Update(delta)
+			}
+		}
+
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		if m.aLeft {
-			m.vX = m.vX - 1
+		for _, a := range m.Actors {
+			render := a.GetComponent(actor.Render)
+			if render != nil {
+				render.Update(delta)
+				render.(actor.Renderer).Render()
+			}
 		}
-		if m.aRight {
-			m.vX = m.vX + 1
-		}
-		if m.aUp {
-			m.vY = m.vY - 1
-		}
-		if m.aDown {
-			m.vY = m.vY + 1
-		}
-		if m.aSpace {
-			m.vX = 0
-			m.vY = 0
-		}
-
-		x += m.vX
-		y += m.vY
-
-		radius := 5 + (math.Abs(m.vX)+math.Abs(m.vY))/2
-
-		if x >= (windowW-radius/2) && m.vX > 0 {
-			x = windowW - radius/2
-			m.vX = -m.vX
-		}
-		if x <= radius/2 && m.vX < 0 {
-			x = radius / 2
-			m.vX = -m.vX
-		}
-		if y >= (windowH-radius/2) && m.vY > 0 {
-			y = windowH - radius/2
-			m.vY = -m.vY
-		}
-		if y <= radius/2 && m.vY < 0 {
-			y = radius / 2
-			m.vY = -m.vY
-		}
-
-		gl.Begin(gl.TRIANGLE_FAN)
-		gl.Color4f(gl.Float(1.0), gl.Float(0.0), gl.Float(0.0), gl.Float(1.0))
-		gl.Vertex2f(gl.Float(x), gl.Float(y))
-		gl.Color4f(gl.Float(1.0), gl.Float(1.0), gl.Float(0.0), gl.Float(1.0))
-		segments := float64(20)
-		for n := float64(0); n <= segments; n++ {
-			t := math.Pi * 2 * n / segments
-			gl.Vertex2f(gl.Float(x+math.Sin(t)*radius), gl.Float(y+math.Cos(t)*radius))
-		}
-		gl.End()
 
 		m.flip()
 	}
@@ -165,39 +155,19 @@ func (m *Main) handleEvents() {
 			m.Running = false
 			break
 		case *sdl.KeyboardEvent:
-			event := event.(*sdl.KeyboardEvent)
-			if event.Type == sdl.KEYDOWN {
-				switch event.Keysym.Sym {
-				case sdl.K_ESCAPE:
-					m.Running = false
-				case sdl.K_LEFT:
-					m.aLeft = true
-				case sdl.K_RIGHT:
-					m.aRight = true
-				case sdl.K_UP:
-					m.aUp = true
-				case sdl.K_DOWN:
-					m.aDown = true
-				case sdl.K_SPACE:
-					m.aSpace = true
-				}
+			k := event.(*sdl.KeyboardEvent)
+			if k.Type == sdl.KEYDOWN && k.Keysym.Sym == sdl.K_ESCAPE {
+				m.Running = false
 			}
-			if event.Type == sdl.KEYUP {
-				switch event.Keysym.Sym {
-				case sdl.K_ESCAPE:
-					m.Running = false
-				case sdl.K_LEFT:
-					m.aLeft = false
-				case sdl.K_RIGHT:
-					m.aRight = false
-				case sdl.K_UP:
-					m.aUp = false
-				case sdl.K_DOWN:
-					m.aDown = false
-				case sdl.K_SPACE:
-					m.aSpace = false
-				}
+		}
+
+		for _, a := range m.Actors {
+			control := a.GetComponent(actor.Control)
+			if control == nil {
+				continue
 			}
+
+			control.(actor.Controller).HandleEvent(event)
 		}
 	}
 }

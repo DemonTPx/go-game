@@ -5,7 +5,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/demontpx/go-game/lib/actor/property"
+	"github.com/DemonTPx/go-game/lib/actor/property"
 )
 
 type TransformComponentBuilder struct {

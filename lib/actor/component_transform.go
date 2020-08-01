@@ -1,6 +1,6 @@
 package actor
 
-import "github.com/demontpx/go-game/lib/actor/property"
+import "github.com/DemonTPx/go-game/lib/actor/property"
 
 type TransformComponent struct {
 	BaseComponent

@@ -3,16 +3,16 @@ package property
 import "fmt"
 
 type Color struct {
-	R uint8
-	G uint8
-	B uint8
-	A uint8
+	R float64
+	G float64
+	B float64
+	A float64
 }
 
-func NewColor(r uint8, g uint8, b uint8, a uint8) Color {
+func NewColor(r float64, g float64, b float64, a float64) Color {
 	return Color{r, g, b, a}
 }
 
 func (c *Color) String() string {
-	return fmt.Sprintf("<Color red=%d green=%d blue=%d alpha=%d>", c.R, c.G, c.B, c.A)
+	return fmt.Sprintf("<Color red=%f green=%f blue=%f alpha=%f>", c.R, c.G, c.B, c.A)
 }
