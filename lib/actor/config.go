@@ -2,10 +2,7 @@ package actor
 
 import "fmt"
 
-type ComponentConfig struct {
-	Type string         `yaml:"type"`
-	Data VariableConfig `yaml:"data"`
-}
+type ComponentConfig map[string]VariableConfig
 
 type VariableConfig map[interface{}]interface{}
 

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/demontpx/go-game/lib/actor"
-	"github.com/demontpx/go-game/lib/game"
+	"github.com/DemonTPx/go-game/lib/actor"
+	"github.com/DemonTPx/go-game/lib/game"
 )
 
 func main() {

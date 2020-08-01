@@ -1,21 +1,10 @@
-- type: transform
-  data:
-    x: 10
-    y: 20
-    z: -1
-- type: physics
-  data:
-    strength: 100
-    shape: circle
-- type: render
-  data:
-    type: ball
-    color:
-      r: 0xaa
-      g: 0xbb
-      b: 0xcc
-      a: 0xff
-#- type: control
-#  data:
-#    control:
-#      type: kaas
+transform:
+  position: {x: 10, y: 20, z: -1}
+physics:
+  strength: 100
+  shape: circle
+render:
+  type: ball
+  color: {r: 0xaa, g: 0xbb, b: 0xcc, a: 0xff}
+control:
+  type: kaas

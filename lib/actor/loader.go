@@ -20,6 +20,7 @@ func NewLoader() *Loader {
 			"transform": NewTransformComponentBuilder(),
 			"physics":   NewPhysicsComponentBuilder(),
 			"render":    NewRenderComponentBuilder(),
+			"control":   NewControlComponentBuilder(),
 		},
 	}
 }
@@ -44,7 +45,7 @@ func (l *Loader) LoadActorFromFile(filename string) (*Actor, error) {
 		return nil, fmt.Errorf("error while reading file %s: %s", filename, err)
 	}
 
-	var config []ComponentConfig
+	var config ComponentConfig
 
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
@@ -53,18 +54,19 @@ func (l *Loader) LoadActorFromFile(filename string) (*Actor, error) {
 
 	actor := NewActor(l.GetNextActorId())
 
-	for _, c := range config {
-		builder, ok := l.builders[c.Type]
+	for t, data := range config {
+		builder, ok := l.builders[t]
 		if !ok {
-			return nil, fmt.Errorf("no builder found for type '%s'", c.Type)
+			return nil, fmt.Errorf("no builder found for type '%s'", t)
 		}
 
-		component, err := builder.Build(c.Data)
+		component, err := builder.Build(data)
 		if err != nil {
-			return nil, fmt.Errorf("error while building component of type '%s': %s", c.Type, err)
+			return nil, fmt.Errorf("error while building component of type '%s': %s", t, err)
 		}
 
 		actor.AddComponent(component)
+		component.SetOwner(actor)
 	}
 
 	return actor, nil
