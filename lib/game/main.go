@@ -1,27 +1,32 @@
 package game
 
 import (
+	"fmt"
+	gl "github.com/chsc/gogl/gl21"
 	"github.com/veandco/go-sdl2/sdl"
 	"math"
 )
 
 type Main struct {
-	Window  *sdl.Window
-	Running bool
-	Frame   uint64
-	Timer   *Timer
-	aLeft   bool
-	aRight  bool
-	aUp     bool
-	aDown   bool
-	vX      float64
-	vY      float64
+	Window   *sdl.Window
+	Renderer *sdl.Renderer
+	Context  sdl.GLContext
+	Running  bool
+	Frame    uint64
+	Timer    *Timer
+	aLeft    bool
+	aRight   bool
+	aUp      bool
+	aDown    bool
+	aSpace   bool
+	vX       float64
+	vY       float64
 }
 
 const (
-	windowTitle        = "Testing"
-	windowW            = 800
-	windowH            = 600
+	windowTitle        = "Go Game"
+	windowW            = 1600
+	windowH            = 900
 	frameDelay  uint32 = 1000 / 60
 )
 
@@ -41,69 +46,111 @@ func (m *Main) Run() error {
 	}
 	defer sdl.Quit()
 
-	m.Window, err = sdl.CreateWindow(
-		windowTitle,
-		sdl.WINDOWPOS_UNDEFINED,
-		sdl.WINDOWPOS_UNDEFINED,
-		windowW,
-		windowH,
-		sdl.WINDOW_SHOWN,
-	)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
+
+	sdl.GLSetAttribute(sdl.GL_MULTISAMPLESAMPLES, 4)
+	sdl.GLSetAttribute(sdl.GL_DOUBLEBUFFER, 1)
+
+	m.Window, m.Renderer, err = sdl.CreateWindowAndRenderer(windowW, windowH, sdl.WINDOW_OPENGL)
 	if err != nil {
 		return err
 	}
+	defer m.Renderer.Destroy()
 	defer m.Window.Destroy()
+
+	m.Window.SetTitle(windowTitle)
+
+	info, err := m.Renderer.GetInfo()
+	if err != nil {
+		return err
+	}
+
+	expectedFlags := uint32(sdl.RENDERER_ACCELERATED | sdl.RENDERER_TARGETTEXTURE)
+	if (info.Flags & expectedFlags) != expectedFlags {
+		return fmt.Errorf("failed to create opengl context")
+	}
+
+	m.Context, err = m.Window.GLCreateContext()
+	if err != nil {
+		return fmt.Errorf("failed to create opengl context")
+	}
+
+	gl.Init()
+	gl.Viewport(0, 0, gl.Sizei(windowW), gl.Sizei(windowH))
+
+	gl.ClearColor(0.2, 0.2, 0.2, 1.0)
+	gl.MatrixMode(gl.PROJECTION)
+	gl.Ortho(gl.Double(0), gl.Double(windowW), gl.Double(windowH), gl.Double(0), gl.Double(-1.0), gl.Double(1.0))
+
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LESS)
+
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	return m.mainLoop()
 }
 
 func (m *Main) mainLoop() error {
-	x := float64(0)
-	y := float64(0)
+	x := float64(windowW / 2)
+	y := float64(windowH / 2)
 
 	m.Timer.Start()
 	for m.Running {
 		m.handleEvents()
 
-		surface, err := m.Window.GetSurface()
-		if err != nil {
-			return err
-		}
-
-		// Clear screen
-		surface.FillRect(nil, 0)
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		if m.aLeft {
-			m.vX = m.vX - 0.1
+			m.vX = m.vX - 1
 		}
 		if m.aRight {
-			m.vX = m.vX + 0.1
+			m.vX = m.vX + 1
 		}
 		if m.aUp {
-			m.vY = m.vY - 0.1
+			m.vY = m.vY - 1
 		}
 		if m.aDown {
-			m.vY = m.vY + 0.1
+			m.vY = m.vY + 1
+		}
+		if m.aSpace {
+			m.vX = 0
+			m.vY = 0
 		}
 
 		x += m.vX
 		y += m.vY
 
-		if x >= (windowW-math.Abs(m.vX)) && m.vX > 0 {
+		radius := 5 + (math.Abs(m.vX)+math.Abs(m.vY))/2
+
+		if x >= (windowW-radius/2) && m.vX > 0 {
+			x = windowW - radius/2
 			m.vX = -m.vX
 		}
-		if x < 0 && m.vX < 0 {
+		if x <= radius/2 && m.vX < 0 {
+			x = radius / 2
 			m.vX = -m.vX
 		}
-		if y > (windowH-math.Abs(m.vY)) && m.vY > 0 {
+		if y >= (windowH-radius/2) && m.vY > 0 {
+			y = windowH - radius/2
 			m.vY = -m.vY
 		}
-		if y < 0 && m.vY < 0 {
+		if y <= radius/2 && m.vY < 0 {
+			y = radius / 2
 			m.vY = -m.vY
 		}
 
-		rect := sdl.Rect{int32(x), int32(y), int32(math.Abs(m.vX)) + 5, int32(math.Abs(m.vY)) + 5}
-		surface.FillRect(&rect, 0xffff0000)
+		gl.Begin(gl.TRIANGLE_FAN)
+		gl.Color4f(gl.Float(1.0), gl.Float(0.0), gl.Float(0.0), gl.Float(1.0))
+		gl.Vertex2f(gl.Float(x), gl.Float(y))
+		gl.Color4f(gl.Float(1.0), gl.Float(1.0), gl.Float(0.0), gl.Float(1.0))
+		segments := float64(20)
+		for n := float64(0); n <= segments; n++ {
+			t := math.Pi * 2 * n / segments
+			gl.Vertex2f(gl.Float(x+math.Sin(t)*radius), gl.Float(y+math.Cos(t)*radius))
+		}
+		gl.End()
 
 		m.flip()
 	}
@@ -131,6 +178,8 @@ func (m *Main) handleEvents() {
 					m.aUp = true
 				case sdl.K_DOWN:
 					m.aDown = true
+				case sdl.K_SPACE:
+					m.aSpace = true
 				}
 			}
 			if event.Type == sdl.KEYUP {
@@ -145,6 +194,8 @@ func (m *Main) handleEvents() {
 					m.aUp = false
 				case sdl.K_DOWN:
 					m.aDown = false
+				case sdl.K_SPACE:
+					m.aSpace = false
 				}
 			}
 		}
@@ -152,10 +203,7 @@ func (m *Main) handleEvents() {
 }
 
 func (m *Main) flip() {
-	err := m.Window.UpdateSurface()
-	if err != nil {
-		panic(err)
-	}
+	m.Window.GLSwap()
 	m.Frame++
 
 	ticks := m.Timer.GetTicks()
