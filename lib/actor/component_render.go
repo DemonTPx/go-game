@@ -34,25 +34,25 @@ func (c *RenderComponent) String() string {
 func (c *RenderComponent) Render() {
 }
 
-type BallRenderComponent struct {
+type EllipseRenderComponent struct {
 	RenderComponent
 	color    property.Color
 	segments int
 }
 
-func NewBallRenderComponent(color property.Color, segments int) *BallRenderComponent {
-	return &BallRenderComponent{color: color, segments: segments}
+func NewEllipseRenderComponent(color property.Color, segments int) *EllipseRenderComponent {
+	return &EllipseRenderComponent{color: color, segments: segments}
 }
 
-func (c *BallRenderComponent) Name() string {
-	return "BallRenderComponent"
+func (c *EllipseRenderComponent) Name() string {
+	return "EllipseRenderComponent"
 }
 
-func (c *BallRenderComponent) String() string {
+func (c *EllipseRenderComponent) String() string {
 	return fmt.Sprintf("<%s color=%s segments=%d>", c.Name(), c.color.String(), c.segments)
 }
 
-func (c *BallRenderComponent) Render() {
+func (c *EllipseRenderComponent) Render() {
 	transformComponent := c.owner.GetComponent(Transform)
 	if transformComponent == nil {
 		return
@@ -68,7 +68,7 @@ func (c *BallRenderComponent) Render() {
 	segments := float64(c.segments)
 	for n := float64(0); n <= segments; n++ {
 		t := math.Pi * 2 * n / segments
-		gl.Vertex2f(gl.Float(pos.X+math.Sin(t)*scale.X), gl.Float(pos.Y+math.Cos(t)*scale.Y))
+		gl.Vertex2f(gl.Float(pos.X+math.Sin(t)*scale.X/2), gl.Float(pos.Y+math.Cos(t)*scale.Y/2))
 	}
 	gl.End()
 }

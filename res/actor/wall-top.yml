@@ -1,0 +1,10 @@
+transform:
+  position: {x: 800, "y": 15, z: 0}
+  scale: {x: 1600, "y": 30, z: 0}
+physics:
+  velocity: {x: 0, "y": 0, z: 0}
+  friction: 1
+  bounciness: 0
+render:
+  type: rect
+  color: {r: 0, g: 0.6, b: 0, a: 1}

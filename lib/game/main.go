@@ -74,15 +74,15 @@ func (m *Main) Run() error {
 		return fmt.Errorf("failed to create opengl context")
 	}
 
-	gl.Init()
-	gl.Viewport(0, 0, gl.Sizei(windowW), gl.Sizei(windowH))
+	err = gl.Init()
+	if err != nil {
+		return fmt.Errorf("failed to initialize opengl")
+	}
 
+	gl.Viewport(0, 0, gl.Sizei(windowW), gl.Sizei(windowH))
 	gl.ClearColor(0.2, 0.2, 0.2, 1.0)
 	gl.MatrixMode(gl.PROJECTION)
 	gl.Ortho(gl.Double(0), gl.Double(windowW), gl.Double(windowH), gl.Double(0), gl.Double(-1.0), gl.Double(1.0))
-
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.LESS)
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -90,6 +90,8 @@ func (m *Main) Run() error {
 	actorFilenameList := []string{
 		"res/actor/paddle.yml",
 		"res/actor/ball.yml",
+		"res/actor/wall-top.yml",
+		"res/actor/wall-bottom.yml",
 	}
 
 	for _, filename := range actorFilenameList {

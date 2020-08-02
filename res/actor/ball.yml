@@ -1,10 +1,10 @@
 transform:
-  position: {x: 100, "y": 100}
-  scale: {x: 8, "y": 8}
+  position: {x: 800, "y": 450}
+  scale: {x: 15, "y": 15}
 physics:
   velocity: {x: 5, "y": 5}
   friction: 0
   bounciness: 1
 render:
-  type: ball
+  type: ellipse
   color: {r: 1, g: 1, b: 0, a: 1}

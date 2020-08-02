@@ -17,7 +17,7 @@ func NewRenderComponentBuilder() *RenderComponentBuilder {
 
 func (b *RenderComponentBuilder) Build(data VariableConfig) (Component, error) {
 	switch data.GetStringOr("type", "") {
-	case "ball":
+	case "ellipse":
 		color := property.Color{}
 		err := data.Extract("color", &color)
 		if err != nil {
@@ -26,7 +26,7 @@ func (b *RenderComponentBuilder) Build(data VariableConfig) (Component, error) {
 
 		segments := data.GetIntOr("segments", 20)
 
-		return NewBallRenderComponent(color, segments), nil
+		return NewEllipseRenderComponent(color, segments), nil
 	case "rect":
 		color := property.Color{}
 		err := data.Extract("color", &color)
