@@ -88,7 +88,7 @@ func (m *Main) Run() error {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	actorFilenameList := []string{
-		"res/actor/controllable_ball.yml",
+		"res/actor/paddle.yml",
 		"res/actor/ball.yml",
 	}
 

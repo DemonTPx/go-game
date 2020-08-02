@@ -1,10 +1,10 @@
 transform:
-  position: {x: 100, "y": 100, z: 0}
-  scale: {x: 8, "y": 8, z: 0}
+  position: {x: 100, "y": 100}
+  scale: {x: 8, "y": 8}
 physics:
-  velocity: {x: 5, "y": 5, z: 0}
-  strength: 100
-  shape: circle
+  velocity: {x: 5, "y": 5}
+  friction: 0
+  bounciness: 1
 render:
   type: ball
   color: {r: 1, g: 1, b: 0, a: 1}

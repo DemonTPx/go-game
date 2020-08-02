@@ -1,6 +1,9 @@
 package actor
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/mitchellh/mapstructure"
+)
 
 type ComponentConfig map[string]VariableConfig
 
@@ -42,6 +45,24 @@ func (m VariableConfig) GetIntOr(key string, fallback int) int {
 	return v
 }
 
+func (m VariableConfig) GetFloat64(key string) (float64, error) {
+	v, ok := m[key].(float64)
+	if !ok {
+		return 0, fmt.Errorf("error while converting key '%s' to float64", key)
+	}
+
+	return v, nil
+}
+
+func (m VariableConfig) GetFloat64Or(key string, fallback float64) float64 {
+	v, ok := m[key].(float64)
+	if !ok {
+		return fallback
+	}
+
+	return v
+}
+
 func (m VariableConfig) GetVariableConfig(key string) (VariableConfig, error) {
 	v, ok := m[key].(VariableConfig)
 	if !ok {
@@ -58,4 +79,19 @@ func (m VariableConfig) GetVariableConfigOr(key string, fallback VariableConfig)
 	}
 
 	return v
+}
+
+func (m VariableConfig) Extract(key string, v interface{}) error {
+	config, err := m.GetVariableConfig(key)
+	if err != nil {
+		return nil
+	}
+
+	err = mapstructure.Decode(config, v)
+
+	if err != nil {
+		return fmt.Errorf("invalid config for %v at key '%s'", v, key)
+	}
+
+	return nil
 }

@@ -72,3 +72,39 @@ func (c *BallRenderComponent) Render() {
 	}
 	gl.End()
 }
+
+type RectRenderComponent struct {
+	RenderComponent
+	color property.Color
+}
+
+func NewRectRenderComponent(color property.Color) *RectRenderComponent {
+	return &RectRenderComponent{color: color}
+}
+
+func (c *RectRenderComponent) Name() string {
+	return "RectRenderComponent"
+}
+
+func (c *RectRenderComponent) String() string {
+	return fmt.Sprintf("<%s color=%s>", c.Name(), c.color.String())
+}
+
+func (c *RectRenderComponent) Render() {
+	transformComponent := c.owner.GetComponent(Transform)
+	if transformComponent == nil {
+		return
+	}
+
+	transform := transformComponent.(*TransformComponent)
+	pos := transform.Position
+	scale := transform.Scale
+
+	gl.Begin(gl.TRIANGLE_STRIP)
+	gl.Color4f(gl.Float(c.color.R), gl.Float(c.color.G), gl.Float(c.color.B), gl.Float(c.color.A))
+	gl.Vertex2f(gl.Float(pos.X-scale.X/2), gl.Float(pos.Y-scale.Y/2))
+	gl.Vertex2f(gl.Float(pos.X+scale.X/2), gl.Float(pos.Y-scale.Y/2))
+	gl.Vertex2f(gl.Float(pos.X-scale.X/2), gl.Float(pos.Y+scale.Y/2))
+	gl.Vertex2f(gl.Float(pos.X+scale.X/2), gl.Float(pos.Y+scale.Y/2))
+	gl.End()
+}

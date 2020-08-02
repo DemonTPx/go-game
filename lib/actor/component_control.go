@@ -42,23 +42,30 @@ func (c *ControlComponent) Update(delta time.Duration) {
 
 	p := physics.(*PhysicsComponent)
 
-	d := float64(delta/time.Millisecond) / 20
+	//d := float64(delta/time.Millisecond) / 20
+	//
+	//if c.Up {
+	//	p.Velocity.Y -= d
+	//}
+	//if c.Down {
+	//	p.Velocity.Y += d
+	//}
+	//if c.Left {
+	//	p.Velocity.X -= d
+	//}
+	//if c.Right {
+	//	p.Velocity.X += d
+	//}
+	//if c.Space {
+	//	p.Velocity.X = 0
+	//	p.Velocity.Y = 0
+	//}
 
-	if c.Up {
-		p.Velocity.Y -= d
+	if c.Up && !c.Down {
+		p.Velocity.Y = -20
 	}
-	if c.Down {
-		p.Velocity.Y += d
-	}
-	if c.Left {
-		p.Velocity.X -= d
-	}
-	if c.Right {
-		p.Velocity.X += d
-	}
-	if c.Space {
-		p.Velocity.X = 0
-		p.Velocity.Y = 0
+	if c.Down && !c.Up {
+		p.Velocity.Y = 20
 	}
 }
 

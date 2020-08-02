@@ -1,0 +1,12 @@
+transform:
+  position: {x: 30, "y": 450, z: -1}
+  scale: {x: 15, "y": 100, z: 0}
+physics:
+  velocity: {x: 0, "y": 0, z: 0}
+  friction: 0.3
+  bounciness: 0
+render:
+  type: rect
+  color: {r: 1, g: 0, b: 0, a: 1}
+control:
+  type: kaas

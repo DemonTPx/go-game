@@ -16,11 +16,13 @@ func (b *PhysicsComponentBuilder) Build(data VariableConfig) (Component, error) 
 	var err error
 
 	velocity := property.NewVector3(0, 0, 0)
-
-	err = extractVector3(data, "velocity", &velocity)
+	err = data.Extract("velocity", &velocity)
 	if err != nil {
 		return nil, fmt.Errorf("invalid configuration for type '%s': %s", data["type"], err)
 	}
 
-	return NewPhysicsComponent(velocity), nil
+	friction := data.GetFloat64Or("friction", 0)
+	bounciness := data.GetFloat64Or("bounciness", 1)
+
+	return NewPhysicsComponent(velocity, friction, bounciness), nil
 }
