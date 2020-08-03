@@ -3,8 +3,10 @@ package game
 import (
 	"fmt"
 	"github.com/DemonTPx/go-game/lib/actor"
+	"github.com/DemonTPx/go-game/lib/render"
 	gl "github.com/chsc/gogl/gl21"
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/ttf"
 	"time"
 )
 
@@ -44,13 +46,20 @@ func (m *Main) Run() error {
 	}
 	defer sdl.Quit()
 
+	err = ttf.Init()
+	if err != nil {
+		return fmt.Errorf("error while initializing sdl2_ttf: %s", err)
+	}
+	defer ttf.Quit()
+
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 3)
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
 
 	sdl.GLSetAttribute(sdl.GL_MULTISAMPLESAMPLES, 4)
 	sdl.GLSetAttribute(sdl.GL_DOUBLEBUFFER, 1)
 
-	m.Window, m.Renderer, err = sdl.CreateWindowAndRenderer(windowW, windowH, sdl.WINDOW_OPENGL)
+	m.Window, m.Renderer, err = sdl.CreateWindowAndRenderer(windowW, windowH, sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
 	if err != nil {
 		return err
 	}
@@ -79,10 +88,18 @@ func (m *Main) Run() error {
 		return fmt.Errorf("failed to initialize opengl")
 	}
 
-	gl.Viewport(0, 0, gl.Sizei(windowW), gl.Sizei(windowH))
 	gl.ClearColor(0.2, 0.2, 0.2, 1.0)
+	gl.Viewport(0, 0, gl.Sizei(windowW), gl.Sizei(windowH))
+
 	gl.MatrixMode(gl.PROJECTION)
-	gl.Ortho(gl.Double(0), gl.Double(windowW), gl.Double(windowH), gl.Double(0), gl.Double(-1.0), gl.Double(1.0))
+	gl.LoadIdentity()
+
+	gl.Ortho(gl.Double(0), gl.Double(windowW), gl.Double(windowH), gl.Double(0), gl.Double(1.0), gl.Double(-1.0))
+
+	gl.MatrixMode(gl.MODELVIEW)
+	gl.LoadIdentity()
+
+	gl.Enable(gl.TEXTURE_2D)
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -116,31 +133,51 @@ func (m *Main) loadActor(filename string) error {
 }
 
 func (m *Main) mainLoop() error {
+	font, err := render.NewFont("res/font/Inconsolata-Regular.ttf", 20)
+	if err != nil {
+		return fmt.Errorf("error while opening font: %s", err)
+	}
+	defer font.Close()
+
+	smiling, err := render.NewTextureFromFile("res/sprite/awesomeface.png")
+	if err != nil {
+		return fmt.Errorf("error while loading texture: %s", err)
+	}
+
+	text, err := font.RenderTexture("Hallo, dit is wat tekst!")
+	if err != nil {
+		return fmt.Errorf("error while rendering text: %s", err)
+	}
+
 	m.Timer.Start()
 	delta := 1 * time.Second / 60
 	for m.Running {
 		m.handleEvents()
 
 		for _, a := range m.Actors {
-			control := a.GetComponent(actor.Control)
-			if control != nil {
-				control.Update(delta)
+			c := a.GetComponent(actor.Control)
+			if c != nil {
+				c.Update(delta)
 			}
 		}
 		for _, a := range m.Actors {
-			physics := a.GetComponent(actor.Physics)
-			if physics != nil {
-				physics.Update(delta)
+			c := a.GetComponent(actor.Physics)
+			if c != nil {
+				c.Update(delta)
 			}
 		}
 
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		gl.LoadIdentity()
+
+		smiling.Draw(100, 100, -0.8)
+		text.Draw(100, 700, 0.1)
 
 		for _, a := range m.Actors {
-			render := a.GetComponent(actor.Render)
-			if render != nil {
-				render.Update(delta)
-				render.(actor.Renderer).Render()
+			c := a.GetComponent(actor.Render)
+			if c != nil {
+				c.Update(delta)
+				c.(actor.Renderer).Render()
 			}
 		}
 

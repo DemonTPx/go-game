@@ -64,11 +64,11 @@ func (c *EllipseRenderComponent) Render() {
 
 	gl.Begin(gl.TRIANGLE_FAN)
 	gl.Color4f(gl.Float(c.color.R), gl.Float(c.color.G), gl.Float(c.color.B), gl.Float(c.color.A))
-	gl.Vertex2f(gl.Float(pos.X), gl.Float(pos.Y))
+	gl.Vertex3f(gl.Float(pos.X), gl.Float(pos.Y), gl.Float(pos.Z))
 	segments := float64(c.segments)
 	for n := float64(0); n <= segments; n++ {
 		t := math.Pi * 2 * n / segments
-		gl.Vertex2f(gl.Float(pos.X+math.Sin(t)*scale.X/2), gl.Float(pos.Y+math.Cos(t)*scale.Y/2))
+		gl.Vertex3f(gl.Float(pos.X+math.Sin(t)*scale.X/2), gl.Float(pos.Y+math.Cos(t)*scale.Y/2), gl.Float(pos.Z))
 	}
 	gl.End()
 }
@@ -100,11 +100,11 @@ func (c *RectRenderComponent) Render() {
 	pos := transform.Position
 	scale := transform.Scale
 
-	gl.Begin(gl.TRIANGLE_STRIP)
+	gl.Begin(gl.QUADS)
 	gl.Color4f(gl.Float(c.color.R), gl.Float(c.color.G), gl.Float(c.color.B), gl.Float(c.color.A))
-	gl.Vertex2f(gl.Float(pos.X-scale.X/2), gl.Float(pos.Y-scale.Y/2))
-	gl.Vertex2f(gl.Float(pos.X+scale.X/2), gl.Float(pos.Y-scale.Y/2))
-	gl.Vertex2f(gl.Float(pos.X-scale.X/2), gl.Float(pos.Y+scale.Y/2))
-	gl.Vertex2f(gl.Float(pos.X+scale.X/2), gl.Float(pos.Y+scale.Y/2))
+	gl.Vertex3f(gl.Float(pos.X-scale.X/2), gl.Float(pos.Y-scale.Y/2), gl.Float(pos.Z))
+	gl.Vertex3f(gl.Float(pos.X+scale.X/2), gl.Float(pos.Y-scale.Y/2), gl.Float(pos.Z))
+	gl.Vertex3f(gl.Float(pos.X+scale.X/2), gl.Float(pos.Y+scale.Y/2), gl.Float(pos.Z))
+	gl.Vertex3f(gl.Float(pos.X-scale.X/2), gl.Float(pos.Y+scale.Y/2), gl.Float(pos.Z))
 	gl.End()
 }
