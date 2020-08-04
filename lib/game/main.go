@@ -95,12 +95,13 @@ func (m *Main) Run() error {
 	gl.MatrixMode(gl.PROJECTION)
 	gl.LoadIdentity()
 
-	gl.Ortho(gl.Double(0), gl.Double(windowW), gl.Double(windowH), gl.Double(0), gl.Double(1.0), gl.Double(-1.0))
+	gl.Ortho(gl.Double(0), gl.Double(windowW), gl.Double(windowH), gl.Double(0), gl.Double(-1.0), gl.Double(1.0))
 
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
 
 	gl.Enable(gl.TEXTURE_2D)
+	gl.Enable(gl.DEPTH_TEST)
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)

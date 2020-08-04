@@ -53,8 +53,8 @@ func (f *Font) RenderTextureShadow(text string, color common.Color, shadowColor 
 	}
 	defer surface.Free()
 
-	textDestRect := sdl.Rect{W: textSurface.W, H: textSurface.H}
-	shadowDestRect := sdl.Rect{W: shadowSurface.W, H: shadowSurface.H}
+	textDestRect := sdl.Rect{X: 0, Y: 0, W: textSurface.W, H: textSurface.H}
+	shadowDestRect := sdl.Rect{X: 0, Y: 0, W: shadowSurface.W, H: shadowSurface.H}
 
 	if offset.X >= 0 {
 		shadowDestRect.X = int32(offset.X)
