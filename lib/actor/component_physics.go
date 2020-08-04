@@ -1,18 +1,18 @@
 package actor
 
 import (
-	"github.com/DemonTPx/go-game/lib/actor/property"
+	"github.com/DemonTPx/go-game/lib/common"
 	"time"
 )
 
 type PhysicsComponent struct {
 	BaseComponent
-	Velocity   property.Vector3
+	Velocity   common.Vector3
 	friction   float64
 	bounciness float64
 }
 
-func NewPhysicsComponent(velocity property.Vector3, friction float64, bounciness float64) *PhysicsComponent {
+func NewPhysicsComponent(velocity common.Vector3, friction float64, bounciness float64) *PhysicsComponent {
 	return &PhysicsComponent{Velocity: velocity, friction: friction, bounciness: bounciness}
 }
 

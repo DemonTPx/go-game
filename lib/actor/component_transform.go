@@ -1,15 +1,17 @@
 package actor
 
-import "github.com/DemonTPx/go-game/lib/actor/property"
+import (
+	"github.com/DemonTPx/go-game/lib/common"
+)
 
 type TransformComponent struct {
 	BaseComponent
-	Position property.Vector3
-	Rotation property.Vector3
-	Scale    property.Vector3
+	Position common.Vector3
+	Rotation common.Vector3
+	Scale    common.Vector3
 }
 
-func NewTransformComponent(position property.Vector3, rotation property.Vector3, scale property.Vector3) *TransformComponent {
+func NewTransformComponent(position common.Vector3, rotation common.Vector3, scale common.Vector3) *TransformComponent {
 	return &TransformComponent{
 		Position: position,
 		Rotation: rotation,

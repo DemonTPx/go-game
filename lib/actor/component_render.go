@@ -2,7 +2,7 @@ package actor
 
 import (
 	"fmt"
-	"github.com/DemonTPx/go-game/lib/actor/property"
+	"github.com/DemonTPx/go-game/lib/common"
 	gl "github.com/chsc/gogl/gl21"
 	"math"
 )
@@ -36,11 +36,11 @@ func (c *RenderComponent) Render() {
 
 type EllipseRenderComponent struct {
 	RenderComponent
-	color    property.Color
+	color    common.Color
 	segments int
 }
 
-func NewEllipseRenderComponent(color property.Color, segments int) *EllipseRenderComponent {
+func NewEllipseRenderComponent(color common.Color, segments int) *EllipseRenderComponent {
 	return &EllipseRenderComponent{color: color, segments: segments}
 }
 
@@ -75,10 +75,10 @@ func (c *EllipseRenderComponent) Render() {
 
 type RectRenderComponent struct {
 	RenderComponent
-	color property.Color
+	color common.Color
 }
 
-func NewRectRenderComponent(color property.Color) *RectRenderComponent {
+func NewRectRenderComponent(color common.Color) *RectRenderComponent {
 	return &RectRenderComponent{color: color}
 }
 

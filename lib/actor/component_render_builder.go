@@ -2,10 +2,9 @@ package actor
 
 import (
 	"fmt"
+	"github.com/DemonTPx/go-game/lib/common"
 
 	"github.com/mitchellh/mapstructure"
-
-	"github.com/DemonTPx/go-game/lib/actor/property"
 )
 
 type RenderComponentBuilder struct {
@@ -18,7 +17,7 @@ func NewRenderComponentBuilder() *RenderComponentBuilder {
 func (b *RenderComponentBuilder) Build(data VariableConfig) (Component, error) {
 	switch data.GetStringOr("type", "") {
 	case "ellipse":
-		color := property.Color{}
+		color := common.Color{}
 		err := data.Extract("color", &color)
 		if err != nil {
 			return nil, fmt.Errorf("invalid configuration for type '%s': %s", data["type"], err)
@@ -28,7 +27,7 @@ func (b *RenderComponentBuilder) Build(data VariableConfig) (Component, error) {
 
 		return NewEllipseRenderComponent(color, segments), nil
 	case "rect":
-		color := property.Color{}
+		color := common.Color{}
 		err := data.Extract("color", &color)
 		if err != nil {
 			return nil, fmt.Errorf("invalid configuration for type '%s': %s", data["type"], err)
@@ -40,7 +39,7 @@ func (b *RenderComponentBuilder) Build(data VariableConfig) (Component, error) {
 	}
 }
 
-func extractColor(data VariableConfig, key string, v *property.Color) error {
+func extractColor(data VariableConfig, key string, v *common.Color) error {
 	config, err := data.GetVariableConfig(key)
 	if err != nil {
 		return nil

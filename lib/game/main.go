@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"github.com/DemonTPx/go-game/lib/actor"
+	"github.com/DemonTPx/go-game/lib/common"
 	"github.com/DemonTPx/go-game/lib/render"
 	gl "github.com/chsc/gogl/gl21"
 	"github.com/veandco/go-sdl2/sdl"
@@ -133,7 +134,7 @@ func (m *Main) loadActor(filename string) error {
 }
 
 func (m *Main) mainLoop() error {
-	font, err := render.NewFont("res/font/Inconsolata-Regular.ttf", 20)
+	font, err := render.NewFont("res/font/Inconsolata-Regular.ttf", 72)
 	if err != nil {
 		return fmt.Errorf("error while opening font: %s", err)
 	}
@@ -144,7 +145,12 @@ func (m *Main) mainLoop() error {
 		return fmt.Errorf("error while loading texture: %s", err)
 	}
 
-	text, err := font.RenderTexture("Hallo, dit is wat tekst!")
+	text, err := font.RenderTextureShadow(
+		"Hallo, dit is wat tekst!",
+		common.NewColor(1.0, 0.5, 0, 1),
+		common.NewColor(0.3, 0.3, 0.3, 0.3),
+		common.NewVector2(2, 2),
+	)
 	if err != nil {
 		return fmt.Errorf("error while rendering text: %s", err)
 	}
@@ -171,7 +177,7 @@ func (m *Main) mainLoop() error {
 		gl.LoadIdentity()
 
 		smiling.Draw(100, 100, -0.8)
-		text.Draw(100, 700, 0.1)
+		text.Draw(100, 300, 0.1)
 
 		for _, a := range m.Actors {
 			c := a.GetComponent(actor.Render)

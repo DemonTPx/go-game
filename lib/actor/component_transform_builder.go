@@ -2,8 +2,7 @@ package actor
 
 import (
 	"fmt"
-
-	"github.com/DemonTPx/go-game/lib/actor/property"
+	"github.com/DemonTPx/go-game/lib/common"
 )
 
 type TransformComponentBuilder struct {
@@ -16,9 +15,9 @@ func NewTransformComponentBuilder() *TransformComponentBuilder {
 func (b *TransformComponentBuilder) Build(data VariableConfig) (Component, error) {
 	var err error
 
-	position := property.NewVector3(0, 0, 0)
-	rotation := property.NewVector3(0, 0, 0)
-	scale := property.NewVector3(1, 1, 1)
+	position := common.NewVector3(0, 0, 0)
+	rotation := common.NewVector3(0, 0, 0)
+	scale := common.NewVector3(1, 1, 1)
 
 	err = data.Extract("position", &position)
 	if err != nil {
