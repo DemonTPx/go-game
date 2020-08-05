@@ -13,6 +13,10 @@ func NewColor(r, g, b, a float64) Color {
 	return Color{R: r, G: g, B: b, A: a}
 }
 
+func NewColorWhite() Color {
+	return NewColor(1, 1, 1, 1)
+}
+
 func (c *Color) String() string {
 	return fmt.Sprintf("<Color red=%f green=%f blue=%f alpha=%f>", c.R, c.G, c.B, c.A)
 }

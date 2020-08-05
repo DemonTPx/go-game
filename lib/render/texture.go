@@ -85,3 +85,7 @@ func (t *Texture) Draw(x, y, z gl.Float) {
 
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
+
+func (t *Texture) Destroy() {
+	gl.DeleteTextures(1, &t.Id)
+}

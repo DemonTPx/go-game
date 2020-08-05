@@ -54,3 +54,9 @@ func (a *Actor) Update(delta time.Duration) {
 		c.Update(delta)
 	}
 }
+
+func (a *Actor) Destroy() {
+	for _, c := range a.components {
+		c.Destroy()
+	}
+}

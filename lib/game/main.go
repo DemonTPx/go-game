@@ -141,11 +141,6 @@ func (m *Main) mainLoop() error {
 	}
 	defer font.Close()
 
-	smiling, err := render.NewTextureFromFile("res/sprite/awesomeface.png")
-	if err != nil {
-		return fmt.Errorf("error while loading texture: %s", err)
-	}
-
 	text, err := font.RenderTextureShadow(
 		"Hallo, dit is wat tekst!",
 		common.NewColor(1.0, 0.5, 0, 1),
@@ -177,8 +172,7 @@ func (m *Main) mainLoop() error {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.LoadIdentity()
 
-		smiling.Draw(100, 100, -0.8)
-		text.Draw(100, 300, 0.1)
+		text.Draw(100, 300, -0.5)
 
 		for _, a := range m.Actors {
 			c := a.GetComponent(actor.Render)
@@ -189,6 +183,10 @@ func (m *Main) mainLoop() error {
 		}
 
 		m.flip()
+	}
+
+	for _, a := range m.Actors {
+		a.Destroy()
 	}
 
 	return nil

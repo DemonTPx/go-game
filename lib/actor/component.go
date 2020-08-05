@@ -18,6 +18,7 @@ type Component interface {
 	Owner() *Actor
 	SetOwner(actor *Actor)
 	Update(delta time.Duration)
+	Destroy()
 }
 
 type BaseComponent struct {
@@ -33,6 +34,9 @@ func (c *BaseComponent) SetOwner(actor *Actor) {
 }
 
 func (c *BaseComponent) Update(delta time.Duration) {
+}
+
+func (c *BaseComponent) Destroy() {
 }
 
 type Builder interface {
