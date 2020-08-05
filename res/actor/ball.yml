@@ -2,7 +2,7 @@ transform:
   position: {x: 800.0, "y": 500.0, z: 0.0}
   scale: {x: 150.0, "y": 150.0, z: 0.0}
 physics:
-  velocity: {x: 5.0, "y": 5.0, z: 0.0}
+  velocity: {x: 0.3125, "y": 0.3125, z: 0.0}
   friction: 0.0
   bounciness: 1.0
 render:

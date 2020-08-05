@@ -18,8 +18,9 @@ type Main struct {
 
 	Running bool
 
-	Frame uint64
-	Timer *Timer
+	Frame      uint64
+	FrameTimer *Timer
+	FPS        *FramesPerSecond
 
 	ActorLoader  *actor.Loader
 	Actors       map[actor.Id]*actor.Actor
@@ -32,7 +33,8 @@ const (
 	windowW = 1600
 	windowH = 900
 
-	frameDelay uint32 = 16 // about 60 fps
+	fps           = 60
+	frameDuration = time.Second / fps
 
 	enableActorWatcher = true
 )
@@ -40,7 +42,8 @@ const (
 func NewMain() *Main {
 	return &Main{
 		Running:     true,
-		Timer:       NewTimer(),
+		FrameTimer:  NewTimer(),
+		FPS:         NewFramesPerSecond(5 * time.Second),
 		ActorLoader: actor.NewLoader(),
 		Actors:      make(map[actor.Id]*actor.Actor, 0),
 	}
@@ -212,9 +215,12 @@ func (m *Main) mainLoop() error {
 		return fmt.Errorf("error while rendering text: %s", err)
 	}
 
-	m.Timer.Start()
-	delta := time.Duration(frameDelay) * time.Millisecond
+	m.FrameTimer.Reset()
+	m.FPS.Reset()
 	for m.Running {
+		delta := m.FrameTimer.Duration()
+		m.FrameTimer.Reset()
+
 		err = m.reloadChangedActors()
 		if err != nil {
 			return err
@@ -266,8 +272,16 @@ func (m *Main) handleEvents() {
 			break
 		case *sdl.KeyboardEvent:
 			k := event.(*sdl.KeyboardEvent)
-			if k.Type == sdl.KEYDOWN && k.Keysym.Sym == sdl.K_ESCAPE {
-				m.Running = false
+			if k.Type == sdl.KEYDOWN {
+				switch k.Keysym.Sym {
+				case sdl.K_ESCAPE:
+					m.Running = false
+				case sdl.K_F12:
+					fmt.Println("listing all actors")
+					for id, a := range m.Actors {
+						fmt.Printf("actor %d: %+v\n\n", id, a)
+					}
+				}
 			}
 		}
 
@@ -286,10 +300,10 @@ func (m *Main) flip() {
 	m.Window.GLSwap()
 	m.Frame++
 
-	ticks := m.Timer.GetTicks()
-	if ticks < frameDelay {
-		delay := frameDelay - ticks
-		sdl.Delay(delay)
+	duration := m.FrameTimer.Duration()
+	if duration < frameDuration {
+		time.Sleep(frameDuration - duration)
 	}
-	m.Timer.Start()
+
+	m.FPS.OnFrame(m.Frame)
 }

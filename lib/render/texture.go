@@ -57,6 +57,10 @@ func NewTextureFromFile(file string) (*Texture, error) {
 	return NewTextureFromSurface(surface), nil
 }
 
+func (t *Texture) String() string {
+	return fmt.Sprintf("<Texture id=%d w=%d h=%d>", uint(t.Id), t.W, t.H)
+}
+
 func (t *Texture) Bind() {
 	gl.BindTexture(gl.TEXTURE_2D, t.Id)
 }

@@ -1,6 +1,7 @@
 package actor
 
 import (
+	"fmt"
 	"github.com/DemonTPx/go-game/lib/common"
 )
 
@@ -28,9 +29,5 @@ func (c *TransformComponent) Name() string {
 }
 
 func (c *TransformComponent) String() string {
-	return "<" + c.Name() +
-		" position=" + c.Position.String() +
-		" rotation=" + c.Rotation.String() +
-		" scale=" + c.Scale.String() +
-		">"
+	return fmt.Sprintf("<%s position=%s rotation=%s scale=%s>", c.Name(), c.Position.String(), c.Rotation.String(), c.Scale.String())
 }

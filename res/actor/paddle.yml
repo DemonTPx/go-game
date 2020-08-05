@@ -3,7 +3,7 @@ transform:
   scale: {x: 15.0, "y": 150.0, z: 0.0}
 physics:
   velocity: {x: 0.0, "y": 0.0, z: 0.0}
-  friction: 0.15
+  friction: 0.01
   bounciness: 0.0
 render:
   type: rect
@@ -11,4 +11,4 @@ render:
 control:
   type: paddle
   velocity_factor: 0.5
-  velocity_max: 25.0
+  velocity_max: 1.5

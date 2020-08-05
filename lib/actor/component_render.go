@@ -65,7 +65,8 @@ func (c *EllipseRenderComponent) Name() string {
 }
 
 func (c *EllipseRenderComponent) String() string {
-	return fmt.Sprintf("<%s color=%s segments=%d>", c.Name(), c.color.String(), c.segments)
+	return fmt.Sprintf("<%s color=%s texture=%+v texture_scale=%f texture_offset=%f segments=%d>",
+		c.Name(), c.color.String(), c.texture, c.textureScale, c.textureOffset, c.segments)
 }
 
 func (c *EllipseRenderComponent) Render() {
@@ -134,7 +135,7 @@ func (c *RectRenderComponent) Name() string {
 }
 
 func (c *RectRenderComponent) String() string {
-	return fmt.Sprintf("<%s color=%s>", c.Name(), c.color.String())
+	return fmt.Sprintf("<%s color=%s texture=%+v>", c.Name(), c.color.String(), c.texture)
 }
 
 func (c *RectRenderComponent) Render() {

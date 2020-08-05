@@ -1,29 +1,23 @@
 package game
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"time"
+)
 
 type Timer struct {
-	started    bool
-	startTicks uint32
+	start time.Time
 }
 
 func NewTimer() *Timer {
-	return &Timer{}
-}
-
-func (t *Timer) Start() {
-	t.started = true
-	t.startTicks = sdl.GetTicks()
-}
-
-func (t *Timer) Stop() {
-	t.started = false
-}
-
-func (t *Timer) GetTicks() uint32 {
-	if t.started {
-		return sdl.GetTicks() - t.startTicks
+	return &Timer{
+		start: time.Now(),
 	}
+}
 
-	return 0
+func (t *Timer) Reset() {
+	t.start = time.Now()
+}
+
+func (t *Timer) Duration() time.Duration {
+	return time.Now().Sub(t.start)
 }

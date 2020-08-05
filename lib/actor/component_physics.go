@@ -1,7 +1,9 @@
 package actor
 
 import (
+	"fmt"
 	"github.com/DemonTPx/go-game/lib/common"
+	"math"
 	"time"
 )
 
@@ -25,7 +27,7 @@ func (c *PhysicsComponent) Name() string {
 }
 
 func (c *PhysicsComponent) String() string {
-	return "<" + c.Name() + ">"
+	return fmt.Sprintf("<%s velocity=%s friction=%f bounciness=%f>", c.Name(), c.Velocity.String(), c.friction, c.bounciness)
 }
 
 func (c *PhysicsComponent) Update(delta time.Duration) {
@@ -54,8 +56,11 @@ func (c *PhysicsComponent) Update(delta time.Duration) {
 		t.Position.Y = 900 - t.Scale.Y/2
 	}
 
-	c.Velocity.X = c.Velocity.X * (1 - c.friction)
-	c.Velocity.Y = c.Velocity.Y * (1 - c.friction)
+	deltaMs := float64(delta / time.Millisecond)
 
-	t.Position = t.Position.Add(&c.Velocity)
+	c.Velocity = c.Velocity.MultiFloat64(math.Pow(1-c.friction, deltaMs))
+
+	v := c.Velocity.MultiFloat64(deltaMs)
+
+	t.Position = t.Position.Add(&v)
 }

@@ -85,18 +85,19 @@ func (c *FreeControlComponent) Update(delta time.Duration) {
 
 	p := physics.(*PhysicsComponent)
 
-	d := float64(delta/time.Millisecond) * c.VelocityFactor
+	deltaMs := float64(delta / time.Millisecond)
+	velocityChange := deltaMs * c.VelocityFactor
 
 	for _, a := range c.handler.ActiveActions() {
 		switch a {
 		case ActionUp:
-			p.Velocity.Y -= d
+			p.Velocity.Y -= velocityChange
 		case ActionDown:
-			p.Velocity.Y += d
+			p.Velocity.Y += velocityChange
 		case ActionLeft:
-			p.Velocity.X -= d
+			p.Velocity.X -= velocityChange
 		case ActionRight:
-			p.Velocity.X += d
+			p.Velocity.X += velocityChange
 		case ActionStop:
 			p.Velocity.X = 0
 			p.Velocity.Y = 0
