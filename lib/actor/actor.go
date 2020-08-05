@@ -7,6 +7,8 @@ import (
 
 type Id uint64
 
+const InvalidId Id = 0
+
 type Actor struct {
 	id         Id
 	components map[ComponentId]Component

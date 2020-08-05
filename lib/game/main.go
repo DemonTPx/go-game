@@ -12,21 +12,29 @@ import (
 )
 
 type Main struct {
-	Window      *sdl.Window
-	Renderer    *sdl.Renderer
-	Context     sdl.GLContext
-	Running     bool
-	Frame       uint64
-	Timer       *Timer
-	ActorLoader *actor.Loader
-	Actors      map[actor.Id]*actor.Actor
+	Window   *sdl.Window
+	Renderer *sdl.Renderer
+	Context  sdl.GLContext
+
+	Running bool
+
+	Frame uint64
+	Timer *Timer
+
+	ActorLoader  *actor.Loader
+	Actors       map[actor.Id]*actor.Actor
+	ActorWatcher *actor.Watcher
 }
 
 const (
-	windowTitle        = "Go Game"
-	windowW            = 1600
-	windowH            = 900
-	frameDelay  uint32 = 1000 / 60
+	windowTitle = "Go Game"
+
+	windowW = 1600
+	windowH = 900
+
+	frameDelay uint32 = 16 // about 60 fps
+
+	enableActorWatcher = true
 )
 
 func NewMain() *Main {
@@ -53,12 +61,12 @@ func (m *Main) Run() error {
 	}
 	defer ttf.Quit()
 
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 3)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
+	_ = sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
+	_ = sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 3)
+	_ = sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
 
-	sdl.GLSetAttribute(sdl.GL_MULTISAMPLESAMPLES, 4)
-	sdl.GLSetAttribute(sdl.GL_DOUBLEBUFFER, 1)
+	_ = sdl.GLSetAttribute(sdl.GL_MULTISAMPLESAMPLES, 4)
+	_ = sdl.GLSetAttribute(sdl.GL_DOUBLEBUFFER, 1)
 
 	m.Window, m.Renderer, err = sdl.CreateWindowAndRenderer(windowW, windowH, sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
 	if err != nil {
@@ -106,6 +114,13 @@ func (m *Main) Run() error {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
+	if enableActorWatcher {
+		m.ActorWatcher, err = actor.NewWatcher()
+		if err != nil {
+			return fmt.Errorf("failed to initialize actor watcher: %s", err)
+		}
+	}
+
 	actorFilenameList := []string{
 		"res/actor/paddle.yml",
 		"res/actor/ball.yml",
@@ -114,22 +129,68 @@ func (m *Main) Run() error {
 	}
 
 	for _, filename := range actorFilenameList {
-		err = m.loadActor(filename)
+		var id actor.Id
+		id, err = m.loadActor(filename)
+		if err != nil {
+			return err
+		}
+
+		err = m.ActorWatcher.Watch(id, filename)
 		if err != nil {
 			return err
 		}
 	}
 
+	if m.ActorWatcher != nil {
+		m.ActorWatcher.Start()
+	}
+
 	return m.mainLoop()
 }
 
-func (m *Main) loadActor(filename string) error {
+func (m *Main) loadActor(filename string) (actor.Id, error) {
 	a, err := m.ActorLoader.LoadActorFromFile(filename)
 	if err != nil {
-		return err
+		return actor.InvalidId, err
 	}
 
 	m.Actors[a.Id()] = a
+
+	return a.Id(), nil
+}
+
+func (m *Main) reloadChangedActors() error {
+	if m.ActorWatcher == nil {
+		return nil
+	}
+
+	for _, w := range m.ActorWatcher.GetChangedActors() {
+		oldActor, ok := m.Actors[w.Id]
+		if !ok {
+			fmt.Printf("skip reloading actor since old actor was not found\n")
+			continue
+		}
+
+		id, err := m.loadActor(w.Filename)
+		if err != nil {
+			fmt.Printf("error while reloading actor: %s\n", err)
+			continue
+		}
+
+		oldActor.Destroy()
+		delete(m.Actors, w.Id)
+
+		fmt.Printf("replaced actor %d with %d\n", w.Id, id)
+
+		err = m.ActorWatcher.Unwatch(w.Filename)
+		if err != nil {
+			return err
+		}
+		err = m.ActorWatcher.Watch(id, w.Filename)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
@@ -154,6 +215,11 @@ func (m *Main) mainLoop() error {
 	m.Timer.Start()
 	delta := 1 * time.Second / 60
 	for m.Running {
+		err = m.reloadChangedActors()
+		if err != nil {
+			return err
+		}
+
 		m.handleEvents()
 
 		for _, a := range m.Actors {
