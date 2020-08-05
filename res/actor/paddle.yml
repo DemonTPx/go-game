@@ -1,9 +1,9 @@
 transform:
-  position: {x: 30, "y": 450, z: 0.5}
-  scale: {x: 15, "y": 150, z: 0}
+  position: {x: 30.0, "y": 450.0, z: 0.5}
+  scale: {x: 15.0, "y": 150.0, z: 0.0}
 physics:
-  velocity: {x: 0, "y": 0, z: 0}
-  friction: 0.3
+  velocity: {x: 0.0, "y": 0.0, z: 0.0}
+  friction: 0.15
   bounciness: 0.0
 render:
   type: rect
@@ -11,4 +11,4 @@ render:
 control:
   type: paddle
   velocity_factor: 0.5
-  velocity_max: 25
+  velocity_max: 25.0

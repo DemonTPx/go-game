@@ -213,7 +213,7 @@ func (m *Main) mainLoop() error {
 	}
 
 	m.Timer.Start()
-	delta := 1 * time.Second / 60
+	delta := time.Duration(frameDelay) * time.Millisecond
 	for m.Running {
 		err = m.reloadChangedActors()
 		if err != nil {

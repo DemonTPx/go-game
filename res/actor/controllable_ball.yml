@@ -1,12 +1,12 @@
 transform:
-  position: {x: 50, "y": 50, z: -1}
-  scale: {x: 15, "y": 15, z: 0}
+  position: {x: 50.0, "y": 50.0, z: -1.0}
+  scale: {x: 15.0, "y": 15.0, z: 0.0}
 physics:
-  velocity: {x: 0, "y": 0, z: 0}
-  friction: 0
-  bounciness: 1
+  velocity: {x: 0.0, "y": 0.0, z: 0.0}
+  friction: 0.0
+  bounciness: 1.0
 render:
   type: ball
-  color: {r: 1, g: 0, b: 0, a: 1}
+  color: {r: 1.0, g: 0.0, b: 0.0, a: 1.0}
 control:
-  type: kaas
+  type: free
