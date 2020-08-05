@@ -17,6 +17,15 @@ func (c *Color) String() string {
 	return fmt.Sprintf("<Color red=%f green=%f blue=%f alpha=%f>", c.R, c.G, c.B, c.A)
 }
 
+func (c *Color) Lerp(o *Color, t float64) Color {
+	return Color{
+		R: Lerp(c.R, o.R, t),
+		G: Lerp(c.G, o.G, t),
+		B: Lerp(c.B, o.B, t),
+		A: Lerp(c.A, o.A, t),
+	}
+}
+
 func (c *Color) ToSDL() sdl.Color {
 	return sdl.Color{
 		R: uint8(c.R * 255),

@@ -29,3 +29,11 @@ func (v *Vector3) Multi(o *Vector3) Vector3 {
 func (v *Vector3) MultiFloat64(m float64) Vector3 {
 	return Vector3{X: v.X * m, Y: v.Y * m, Z: v.Z * m}
 }
+
+func (v *Vector3) Lerp(o *Vector3, t float64) Vector3 {
+	return Vector3{
+		X: Lerp(v.X, o.X, t),
+		Y: Lerp(v.Y, o.Y, t),
+		Z: Lerp(v.Z, o.Z, t),
+	}
+}

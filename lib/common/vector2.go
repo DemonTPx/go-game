@@ -30,3 +30,10 @@ func (v *Vector2) Multi(o *Vector2) Vector2 {
 func (v *Vector2) MultiFloat64(m float64) Vector2 {
 	return Vector2{X: v.X * m, Y: v.Y * m}
 }
+
+func (v *Vector2) Lerp(o *Vector2, t float64) Vector2 {
+	return Vector2{
+		X: Lerp(v.X, o.X, t),
+		Y: Lerp(v.Y, o.Y, t),
+	}
+}
