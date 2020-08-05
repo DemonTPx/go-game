@@ -21,8 +21,9 @@ func (b *PhysicsComponentBuilder) Build(data VariableConfig) (Component, error) 
 		return nil, fmt.Errorf("invalid configuration for type '%s': %s", data["type"], err)
 	}
 
-	friction := data.GetFloat64Or("friction", 0)
-	bounciness := data.GetFloat64Or("bounciness", 1)
-
-	return NewPhysicsComponent(velocity, friction, bounciness), nil
+	return NewPhysicsComponent(
+		velocity,
+		data.GetFloat64Or("friction", 0),
+		data.GetFloat64Or("bounciness", 1),
+	), nil
 }
