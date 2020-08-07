@@ -95,7 +95,6 @@ func (c *EllipseRenderComponent) Render() {
 	segments := float64(c.segments)
 	for n := float64(0); n <= segments; n++ {
 		t := math.Pi * 2 * n / segments
-		gl.TexCoord2f(gl.Float(0.5), gl.Float(0.5))
 		if c.texture != nil {
 			gl.TexCoord2f(gl.Float(math.Sin(t)*c.textureScale+c.textureOffset.X), gl.Float(math.Cos(t)*c.textureScale+c.textureOffset.Y))
 		}

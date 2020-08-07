@@ -33,8 +33,9 @@ const (
 	windowW = 1600
 	windowH = 900
 
-	fps           = 60
+	fps           = 62
 	frameDuration = time.Second / fps
+	frameMinSleep = 10 * time.Millisecond
 
 	enableActorWatcher = true
 )
@@ -100,6 +101,11 @@ func (m *Main) Run() error {
 		return fmt.Errorf("failed to initialize opengl")
 	}
 
+	err = sdl.GLSetSwapInterval(1)
+	if err != nil {
+		return fmt.Errorf("failed to enable vsync")
+	}
+
 	gl.ClearColor(0.2, 0.2, 0.2, 1.0)
 	gl.Viewport(0, 0, gl.Sizei(windowW), gl.Sizei(windowH))
 
@@ -138,9 +144,11 @@ func (m *Main) Run() error {
 			return err
 		}
 
-		err = m.ActorWatcher.Watch(id, filename)
-		if err != nil {
-			return err
+		if m.ActorWatcher != nil {
+			err = m.ActorWatcher.Watch(id, filename)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -300,10 +308,10 @@ func (m *Main) flip() {
 	m.Window.GLSwap()
 	m.Frame++
 
-	duration := m.FrameTimer.Duration()
-	if duration < frameDuration {
-		time.Sleep(frameDuration - duration)
-	}
-
 	m.FPS.OnFrame(m.Frame)
+
+	duration := m.FrameTimer.Duration()
+	if duration < frameMinSleep {
+		time.Sleep(frameMinSleep - duration)
+	}
 }
