@@ -22,9 +22,9 @@ type Main struct {
 	FrameTimer *Timer
 	FPS        *FramesPerSecond
 
-	ActorLoader  *actor.Loader
-	Actors       map[actor.Id]*actor.Actor
-	ActorWatcher *actor.Watcher
+	ActorLoader     *actor.Loader
+	ActorCollection *actor.Collection
+	ActorWatcher    *actor.Watcher
 }
 
 const (
@@ -42,11 +42,11 @@ const (
 
 func NewMain() *Main {
 	return &Main{
-		Running:     true,
-		FrameTimer:  NewTimer(),
-		FPS:         NewFramesPerSecond(5 * time.Second),
-		ActorLoader: actor.NewLoader(),
-		Actors:      make(map[actor.Id]*actor.Actor, 0),
+		Running:         true,
+		FrameTimer:      NewTimer(),
+		FPS:             NewFramesPerSecond(5 * time.Second),
+		ActorLoader:     actor.NewLoader(),
+		ActorCollection: actor.NewCollection(),
 	}
 }
 
@@ -101,9 +101,13 @@ func (m *Main) Run() error {
 		return fmt.Errorf("failed to initialize opengl")
 	}
 
-	err = sdl.GLSetSwapInterval(1)
+	err = sdl.GLSetSwapInterval(-1)
 	if err != nil {
-		return fmt.Errorf("failed to enable vsync")
+		fmt.Println("failed to enable adaptive vsync, falling back to vsync")
+		err = sdl.GLSetSwapInterval(1)
+		if err != nil {
+			return fmt.Errorf("failed to enable vsync")
+		}
 	}
 
 	gl.ClearColor(0.2, 0.2, 0.2, 1.0)
@@ -165,7 +169,7 @@ func (m *Main) loadActor(filename string) (actor.Id, error) {
 		return actor.InvalidId, err
 	}
 
-	m.Actors[a.Id()] = a
+	m.ActorCollection.Add(a.Id(), a)
 
 	return a.Id(), nil
 }
@@ -176,7 +180,7 @@ func (m *Main) reloadChangedActors() error {
 	}
 
 	for _, w := range m.ActorWatcher.GetChangedActors() {
-		oldActor, ok := m.Actors[w.Id]
+		oldActor, ok := m.ActorCollection.Get(w.Id)
 		if !ok {
 			fmt.Printf("skip reloading actor since old actor was not found\n")
 			continue
@@ -188,8 +192,7 @@ func (m *Main) reloadChangedActors() error {
 			continue
 		}
 
-		oldActor.Destroy()
-		delete(m.Actors, w.Id)
+		m.ActorCollection.DestroyAndRemove(oldActor)
 
 		fmt.Printf("replaced actor %d with %d\n", w.Id, id)
 
@@ -236,17 +239,11 @@ func (m *Main) mainLoop() error {
 
 		m.handleEvents()
 
-		for _, a := range m.Actors {
-			c := a.GetComponent(actor.Control)
-			if c != nil {
-				c.Update(delta)
-			}
+		for _, c := range m.ActorCollection.GetAllComponent(actor.Control) {
+			c.Update(delta)
 		}
-		for _, a := range m.Actors {
-			c := a.GetComponent(actor.Physics)
-			if c != nil {
-				c.Update(delta)
-			}
+		for _, c := range m.ActorCollection.GetAllComponent(actor.Physics) {
+			c.Update(delta)
 		}
 
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -254,20 +251,15 @@ func (m *Main) mainLoop() error {
 
 		text.Draw(100, 300, -0.5)
 
-		for _, a := range m.Actors {
-			c := a.GetComponent(actor.Render)
-			if c != nil {
-				c.Update(delta)
-				c.(actor.Renderer).Render()
-			}
+		for _, c := range m.ActorCollection.GetAllComponent(actor.Render) {
+			c.Update(delta)
+			c.(actor.Renderer).Render()
 		}
 
 		m.flip()
 	}
 
-	for _, a := range m.Actors {
-		a.Destroy()
-	}
+	m.ActorCollection.Destroy()
 
 	return nil
 }
@@ -286,19 +278,12 @@ func (m *Main) handleEvents() {
 					m.Running = false
 				case sdl.K_F12:
 					fmt.Println("listing all actors")
-					for id, a := range m.Actors {
-						fmt.Printf("actor %d: %+v\n\n", id, a)
-					}
+					m.ActorCollection.Dump()
 				}
 			}
 		}
 
-		for _, a := range m.Actors {
-			control := a.GetComponent(actor.Control)
-			if control == nil {
-				continue
-			}
-
+		for _, control := range m.ActorCollection.GetAllComponent(actor.Control) {
 			control.(actor.Controller).HandleEvent(event)
 		}
 	}
