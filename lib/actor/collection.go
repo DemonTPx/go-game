@@ -1,19 +1,25 @@
 package actor
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/DemonTPx/go-game/lib/event"
+)
 
 type Collection struct {
-	actors map[Id]*Actor
+	actors          map[Id]*Actor
+	eventDispatcher *event.Dispatcher
 }
 
-func NewCollection() *Collection {
+func NewCollection(dispatcher *event.Dispatcher) *Collection {
 	return &Collection{
-		actors: map[Id]*Actor{},
+		actors:          map[Id]*Actor{},
+		eventDispatcher: dispatcher,
 	}
 }
 
 func (c *Collection) Add(id Id, a *Actor) {
 	c.actors[id] = a
+	c.eventDispatcher.Dispatch(NewNewEvent(id, a))
 }
 
 func (c *Collection) Get(id Id) (*Actor, bool) {
@@ -42,10 +48,7 @@ func (c *Collection) GetAllComponent(cId ComponentId) map[Id]Component {
 
 func (c *Collection) DestroyAndRemove(a *Actor) {
 	a.Destroy()
-	delete(c.actors, a.id)
-}
-
-func (c *Collection) Remove(a *Actor) {
+	c.eventDispatcher.Dispatch(NewDestroyedEvent(a.Id()))
 	delete(c.actors, a.id)
 }
 

@@ -13,7 +13,7 @@ type RenderComponent struct {
 }
 
 type Renderer interface {
-	Render()
+	Render(viewport common.Rect)
 }
 
 func NewRenderComponent() *RenderComponent {
@@ -69,7 +69,7 @@ func (c *EllipseRenderComponent) String() string {
 		c.Name(), c.color.String(), c.texture, c.textureScale, c.textureOffset, c.segments)
 }
 
-func (c *EllipseRenderComponent) Render() {
+func (c *EllipseRenderComponent) Render(viewport common.Rect) {
 	transformComponent := c.owner.GetComponent(Transform)
 	if transformComponent == nil {
 		return
@@ -137,7 +137,7 @@ func (c *RectRenderComponent) String() string {
 	return fmt.Sprintf("<%s color=%s texture=%+v>", c.Name(), c.color.String(), c.texture)
 }
 
-func (c *RectRenderComponent) Render() {
+func (c *RectRenderComponent) Render(viewport common.Rect) {
 	transformComponent := c.owner.GetComponent(Transform)
 	if transformComponent == nil {
 		return

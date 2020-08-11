@@ -4,11 +4,24 @@ import (
 	"fmt"
 	"github.com/DemonTPx/go-game/lib/actor"
 	"github.com/DemonTPx/go-game/lib/common"
+	"github.com/DemonTPx/go-game/lib/event"
 	"github.com/DemonTPx/go-game/lib/render"
+	"github.com/DemonTPx/go-game/lib/service"
 	gl "github.com/chsc/gogl/gl21"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 	"time"
+)
+
+const (
+	windowTitle = "Go Game"
+
+	windowW = 1600
+	windowH = 900
+
+	frameMinSleep = 10 * time.Millisecond
+
+	enableActorWatcher = true
 )
 
 type Main struct {
@@ -18,35 +31,37 @@ type Main struct {
 
 	Running bool
 
+	Viewport common.Rect
+
 	Frame      uint64
 	FrameTimer *Timer
-	FPS        *FramesPerSecond
+
+	EventDispatcher *event.Dispatcher
+	InputManager    *service.InputManager
+	RenderManager   *service.RenderManager
 
 	ActorLoader     *actor.Loader
 	ActorCollection *actor.Collection
 	ActorWatcher    *actor.Watcher
+
+	Font *render.Font
 }
 
-const (
-	windowTitle = "Go Game"
-
-	windowW = 1600
-	windowH = 900
-
-	fps           = 62
-	frameDuration = time.Second / fps
-	frameMinSleep = 10 * time.Millisecond
-
-	enableActorWatcher = true
-)
-
 func NewMain() *Main {
+	eventDispatcher := event.NewDispatcher()
+
 	return &Main{
-		Running:         true,
-		FrameTimer:      NewTimer(),
-		FPS:             NewFramesPerSecond(5 * time.Second),
+		Running:    true,
+		FrameTimer: NewTimer(),
+
+		Viewport: common.NewRect(0, 0, windowW, windowH),
+
+		EventDispatcher: eventDispatcher,
+		InputManager:    service.NewInputManager(eventDispatcher),
+		RenderManager:   service.NewRenderManager(eventDispatcher),
+
 		ActorLoader:     actor.NewLoader(),
-		ActorCollection: actor.NewCollection(),
+		ActorCollection: actor.NewCollection(eventDispatcher),
 	}
 }
 
@@ -122,10 +137,19 @@ func (m *Main) Run() error {
 	gl.LoadIdentity()
 
 	gl.Enable(gl.TEXTURE_2D)
+
 	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LESS)
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	m.Font, err = render.NewFont("res/font/Inconsolata-Regular.ttf", 12)
+	if err != nil {
+		return fmt.Errorf("unable to load font")
+	}
+
+	m.RenderManager.Add(service.NewDebugRenderer(m.Font, common.NewColorWhite()))
 
 	if enableActorWatcher {
 		m.ActorWatcher, err = actor.NewWatcher()
@@ -210,24 +234,9 @@ func (m *Main) reloadChangedActors() error {
 }
 
 func (m *Main) mainLoop() error {
-	font, err := render.NewFont("res/font/Inconsolata-Regular.ttf", 72)
-	if err != nil {
-		return fmt.Errorf("error while opening font: %s", err)
-	}
-	defer font.Close()
-
-	text, err := font.RenderTextureShadow(
-		"Hallo, dit is wat tekst!",
-		common.NewColor(1.0, 0.5, 0, 1),
-		common.NewColor(0.3, 0.3, 0.3, 0.3),
-		common.NewVector2(2, 2),
-	)
-	if err != nil {
-		return fmt.Errorf("error while rendering text: %s", err)
-	}
+	var err error
 
 	m.FrameTimer.Reset()
-	m.FPS.Reset()
 	for m.Running {
 		delta := m.FrameTimer.Duration()
 		m.FrameTimer.Reset()
@@ -249,29 +258,29 @@ func (m *Main) mainLoop() error {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.LoadIdentity()
 
-		text.Draw(100, 300, -0.5)
-
 		for _, c := range m.ActorCollection.GetAllComponent(actor.Render) {
 			c.Update(delta)
-			c.(actor.Renderer).Render()
 		}
+
+		m.RenderManager.Render(m.Viewport)
 
 		m.flip()
 	}
 
 	m.ActorCollection.Destroy()
+	m.Font.Close()
 
 	return nil
 }
 
 func (m *Main) handleEvents() {
-	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-		switch event.(type) {
+	for e := sdl.PollEvent(); e != nil; e = sdl.PollEvent() {
+		switch e.(type) {
 		case *sdl.QuitEvent:
 			m.Running = false
 			break
 		case *sdl.KeyboardEvent:
-			k := event.(*sdl.KeyboardEvent)
+			k := e.(*sdl.KeyboardEvent)
 			if k.Type == sdl.KEYDOWN {
 				switch k.Keysym.Sym {
 				case sdl.K_ESCAPE:
@@ -283,17 +292,13 @@ func (m *Main) handleEvents() {
 			}
 		}
 
-		for _, control := range m.ActorCollection.GetAllComponent(actor.Control) {
-			control.(actor.Controller).HandleEvent(event)
-		}
+		m.InputManager.Handle(e)
 	}
 }
 
 func (m *Main) flip() {
 	m.Window.GLSwap()
 	m.Frame++
-
-	m.FPS.OnFrame(m.Frame)
 
 	duration := m.FrameTimer.Duration()
 	if duration < frameMinSleep {
