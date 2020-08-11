@@ -21,7 +21,7 @@ const (
 
 	frameMinSleep = 10 * time.Millisecond
 
-	enableActorWatcher = true
+	debug = true
 )
 
 type Main struct {
@@ -141,14 +141,15 @@ func (m *Main) Run() error {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	m.Font, err = render.NewFont("res/font/Inconsolata-Regular.ttf", 12)
-	if err != nil {
-		return fmt.Errorf("unable to load font")
-	}
+	if debug {
+		m.Font, err = render.NewFont("res/font/Inconsolata-Regular.ttf", 12)
+		if err != nil {
+			return fmt.Errorf("unable to load font")
+		}
+		defer m.Font.Close()
 
-	m.RenderManager.Add(service.NewDebugRenderer(m.Font, common.NewColorWhite()))
+		m.RenderManager.Add(service.NewDebugRenderer(m.Font, common.NewColorWhite()))
 
-	if enableActorWatcher {
 		m.ActorWatcher, err = actor.NewWatcher()
 		if err != nil {
 			return fmt.Errorf("failed to initialize actor watcher: %s", err)
@@ -265,7 +266,6 @@ func (m *Main) mainLoop() error {
 	}
 
 	m.ActorCollection.Destroy()
-	m.Font.Close()
 
 	return nil
 }
