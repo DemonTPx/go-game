@@ -7,6 +7,7 @@ physics:
   bounciness: 0.0
 render:
   type: rect
+  layer: 10.0
   color: {r: 0.8, g: 0.4, b: 0.6, a: 1}
 control:
   type: paddle

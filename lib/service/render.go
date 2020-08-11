@@ -10,6 +10,7 @@ type RendererId uint64
 
 type Renderer interface {
 	Render(viewport common.Rect)
+	RenderLayer() float64
 }
 
 type RenderManager struct {
@@ -50,9 +51,17 @@ func (m *RenderManager) nextRendererId() RendererId {
 }
 
 func (m *RenderManager) Render(viewport common.Rect) {
+	pq := common.NewPriorityQueue()
 	for _, r := range m.renderers {
-		r.Render(viewport)
+		pq.Insert(r, r.RenderLayer())
 	}
+	for r, err := pq.Pop(); err == nil; r, err = pq.Pop() {
+		r.(Renderer).Render(viewport)
+	}
+}
+
+func (m *RenderManager) RenderLayer() float64 {
+	return 0
 }
 
 func (m *RenderManager) OnActorNew(e event.Event) {

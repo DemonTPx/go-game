@@ -45,7 +45,7 @@ func (b *RenderComponentBuilder) Build(data VariableConfig) (Component, error) {
 
 		segments := data.GetIntOr("segments", 20)
 
-		return NewEllipseRenderComponent(color, texture, textureScale, textureOffset, segments), nil
+		return NewEllipseRenderComponent(data.GetFloat64Or("layer", 0), color, texture, textureScale, textureOffset, segments), nil
 	case "rect":
 		color := common.NewColorWhite()
 		err = data.Extract("color", &color)
@@ -62,9 +62,9 @@ func (b *RenderComponentBuilder) Build(data VariableConfig) (Component, error) {
 			}
 		}
 
-		return NewRectRenderComponent(color, texture), nil
+		return NewRectRenderComponent(data.GetFloat64Or("layer", 0), color, texture), nil
 	default:
-		return NewRenderComponent(), nil
+		return NewRenderComponent(data.GetFloat64Or("layer", 0)), nil
 	}
 }
 

@@ -138,9 +138,6 @@ func (m *Main) Run() error {
 
 	gl.Enable(gl.TEXTURE_2D)
 
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.LESS)
-
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 

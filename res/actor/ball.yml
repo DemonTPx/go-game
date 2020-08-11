@@ -7,6 +7,7 @@ physics:
   bounciness: 1.0
 render:
   type: ellipse
+  layer: 0.0
   texture: res/sprite/awesomeface.png
   texture_scale: 0.46
   texture_offset: {x: 0.5, "y": 0.491}

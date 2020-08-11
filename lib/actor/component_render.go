@@ -10,14 +10,18 @@ import (
 
 type RenderComponent struct {
 	BaseComponent
+	layer float64
 }
 
 type Renderer interface {
 	Render(viewport common.Rect)
+	RenderLayer() float64
 }
 
-func NewRenderComponent() *RenderComponent {
-	return &RenderComponent{}
+func NewRenderComponent(layer float64) *RenderComponent {
+	return &RenderComponent{
+		layer: layer,
+	}
 }
 
 func (c *RenderComponent) Id() ComponentId {
@@ -29,10 +33,14 @@ func (c *RenderComponent) Name() string {
 }
 
 func (c *RenderComponent) String() string {
-	return "<" + c.Name() + ">"
+	return fmt.Sprintf("<%s layer=%f>", c.Name(), c.layer)
 }
 
 func (c *RenderComponent) Render() {
+}
+
+func (c *RenderComponent) RenderLayer() float64 {
+	return c.layer
 }
 
 type EllipseRenderComponent struct {
@@ -45,6 +53,7 @@ type EllipseRenderComponent struct {
 }
 
 func NewEllipseRenderComponent(
+	layer float64,
 	color common.Color,
 	texture *render.Texture,
 	textureScale float64,
@@ -52,11 +61,12 @@ func NewEllipseRenderComponent(
 	segments int,
 ) *EllipseRenderComponent {
 	return &EllipseRenderComponent{
-		color:         color,
-		texture:       texture,
-		textureScale:  textureScale,
-		textureOffset: textureOffset,
-		segments:      segments,
+		RenderComponent: *NewRenderComponent(layer),
+		color:           color,
+		texture:         texture,
+		textureScale:    textureScale,
+		textureOffset:   textureOffset,
+		segments:        segments,
 	}
 }
 
@@ -65,8 +75,8 @@ func (c *EllipseRenderComponent) Name() string {
 }
 
 func (c *EllipseRenderComponent) String() string {
-	return fmt.Sprintf("<%s color=%s texture=%+v texture_scale=%f texture_offset=%f segments=%d>",
-		c.Name(), c.color.String(), c.texture, c.textureScale, c.textureOffset, c.segments)
+	return fmt.Sprintf("<%s layer=%f color=%s texture=%+v texture_scale=%f texture_offset=%f segments=%d>",
+		c.Name(), c.layer, c.color.String(), c.texture, c.textureScale, c.textureOffset, c.segments)
 }
 
 func (c *EllipseRenderComponent) Render(viewport common.Rect) {
@@ -120,12 +130,14 @@ type RectRenderComponent struct {
 }
 
 func NewRectRenderComponent(
+	layer float64,
 	color common.Color,
 	texture *render.Texture,
 ) *RectRenderComponent {
 	return &RectRenderComponent{
-		color:   color,
-		texture: texture,
+		RenderComponent: *NewRenderComponent(layer),
+		color:           color,
+		texture:         texture,
 	}
 }
 
@@ -134,7 +146,7 @@ func (c *RectRenderComponent) Name() string {
 }
 
 func (c *RectRenderComponent) String() string {
-	return fmt.Sprintf("<%s color=%s texture=%+v>", c.Name(), c.color.String(), c.texture)
+	return fmt.Sprintf("<%s layer=%f color=%s texture=%+v>", c.Name(), c.layer, c.color.String(), c.texture)
 }
 
 func (c *RectRenderComponent) Render(viewport common.Rect) {

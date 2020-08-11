@@ -30,6 +30,10 @@ func (r *DebugRenderer) Render(viewport common.Rect) {
 		r.counter++
 	}()
 
+	if r.texture == nil {
+		r.renderNewTexture()
+	}
+
 	tick := sdl.GetTicks()
 	if tick > r.tickStart+1000 {
 		r.renderNewTexture()
@@ -37,9 +41,11 @@ func (r *DebugRenderer) Render(viewport common.Rect) {
 		r.tickStart = tick
 	}
 
-	if r.texture != nil {
-		r.texture.Draw(gl.Float(viewport.X2()-100), gl.Float(viewport.Y+5), 1)
-	}
+	r.texture.Draw(gl.Float(viewport.X2()-float64(r.texture.W)-5), gl.Float(viewport.Y+5), 1)
+}
+
+func (r *DebugRenderer) RenderLayer() float64 {
+	return 1000
 }
 
 func (r *DebugRenderer) renderNewTexture() {
