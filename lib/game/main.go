@@ -148,6 +148,8 @@ func (m *Main) Run() error {
 		}
 		defer m.Font.Close()
 
+		m.InputManager.Add(service.NewDumpActorsInputHandler(m.ActorCollection))
+
 		m.RenderManager.Add(service.NewDebugRenderer(m.Font, common.NewColorWhite()))
 
 		m.ActorWatcher, err = actor.NewWatcher()
@@ -282,9 +284,6 @@ func (m *Main) handleEvents() {
 				switch k.Keysym.Sym {
 				case sdl.K_ESCAPE:
 					m.Running = false
-				case sdl.K_F12:
-					fmt.Println("listing all actors")
-					m.ActorCollection.Dump()
 				}
 			}
 		}
