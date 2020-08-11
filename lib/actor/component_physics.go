@@ -42,7 +42,7 @@ func (c *PhysicsComponent) Update(delta time.Duration) {
 		c.Velocity.X = -(c.Velocity.X * c.bounciness)
 		t.Position.X = t.Scale.X / 2
 	}
-	if t.Position.X+t.Scale.X/2 > 1600 && c.Velocity.X > 0 {
+	if t.Position.X+t.Scale.X/2 >= 1600 && c.Velocity.X > 0 {
 		c.Velocity.X = -(c.Velocity.X * c.bounciness)
 		t.Position.X = 1600 - t.Scale.X/2
 	}
@@ -51,7 +51,7 @@ func (c *PhysicsComponent) Update(delta time.Duration) {
 		c.Velocity.Y = -(c.Velocity.Y * c.bounciness)
 		t.Position.Y = t.Scale.Y / 2
 	}
-	if t.Position.Y+t.Scale.Y/2 > 900 && c.Velocity.Y > 0 {
+	if t.Position.Y+t.Scale.Y/2 >= 900 && c.Velocity.Y > 0 {
 		c.Velocity.Y = -(c.Velocity.Y * c.bounciness)
 		t.Position.Y = 900 - t.Scale.Y/2
 	}
